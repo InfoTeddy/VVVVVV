@@ -160,6 +160,7 @@ public:
     int screenshake_x;
     int screenshake_y;
 
+    void drawfpscounter(void);
     void render(void);
     void renderwithscreeneffects(void);
     void renderfixedpre(void);

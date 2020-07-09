@@ -347,6 +347,8 @@ static void inline fixedloop(void)
     }
 }
 
+static int fpscounter_limit = 0;
+
 static void inline deltaloop(void);
 
 static void cleanup(void);
@@ -667,7 +669,12 @@ int main(int argc, char *argv[])
 #else
     while (true)
     {
+        Uint64 frame_start;
+        Uint64 frame_end;
+
         f_time = SDL_GetTicks();
+
+        frame_start = SDL_GetPerformanceCounter();
 
         const Uint32 f_timetaken = f_time - f_timePrev;
         if (!game.over30mode && f_timetaken < 34)
@@ -683,6 +690,22 @@ int main(int argc, char *argv[])
         time_ = SDL_GetTicks();
 
         deltaloop();
+
+        frame_end = SDL_GetPerformanceCounter();
+
+        if (!game.over30mode)
+        {
+            const double frame_offset = static_cast<double>(frame_end - frame_start);
+            const double frequency = static_cast<double>(SDL_GetPerformanceFrequency());
+
+            if (fpscounter_limit <= 0)
+            {
+                fpscounter_limit = 30;
+
+                game.fps = frame_offset / frequency;
+                game.fps = 1.0 / game.fps;
+            }
+        }
     }
 
     cleanup();
@@ -734,6 +757,8 @@ static void inline deltaloop(void)
         graphics.renderfixedpost();
 
         fixedloop();
+
+        --fpscounter_limit;
     }
     const float alpha = game.over30mode ? static_cast<float>(accumulator) / timesteplimit : 1.0f;
     graphics.alpha = alpha;

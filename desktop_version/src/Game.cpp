@@ -364,6 +364,8 @@ void Game::init(void)
     disableaudiopause = false;
     disabletemporaryaudiopause = true;
     inputdelay = false;
+
+    fps = 0.0f;
 }
 
 void Game::lifesequence(void)
