@@ -390,6 +390,8 @@ void Game::init(void)
 
     disablepause = false;
     inputdelay = false;
+
+    fps = 0.0f;
 }
 
 void Game::lifesequence(void)

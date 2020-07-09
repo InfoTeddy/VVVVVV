@@ -471,6 +471,8 @@ public:
 
     bool disablepause;
     bool inputdelay;
+
+    float fps;
 };
 
 #ifndef GAME_DEFINITION

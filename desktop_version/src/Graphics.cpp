@@ -2943,6 +2943,7 @@ void Graphics::menuoffrender(void)
 		setRect (offsetRect, 0, usethisoffset, backBuffer->w ,backBuffer->h);
 		BlitSurfaceStandard(menubuffer,NULL,backBuffer,&offsetRect);
 	}
+	drawfpscounter();
 
 	SDL_Rect rect;
 	setRect(rect, 0, 0, backBuffer->w, backBuffer->h);
@@ -3062,10 +3063,12 @@ int Graphics::crewcolour(const int t)
 void Graphics::flashlight(void)
 {
 	FillRect(backBuffer, 0xBBBBBBBB);
+	drawfpscounter();
 }
 
 void Graphics::screenshake(void)
 {
+	drawfpscounter();
 	if(flipmode)
 	{
 		SDL_Rect shakeRect;
@@ -3090,12 +3093,21 @@ void Graphics::updatescreenshake(void)
 	screenshake_y =  static_cast<Sint32>((fRandom() * 7) - 4);
 }
 
+void Graphics::drawfpscounter(void)
+{
+	static char buffer[32];
+	SDL_snprintf(buffer, sizeof(buffer), "%.1f FPS", game.fps);
+
+	bprint(320 - SDL_strlen(buffer)*8, 0, buffer, 196, 196, 255 - help.glow);
+}
+
 void Graphics::render(void)
 {
 	if(screenbuffer == NULL)
 	{
 		return;
 	}
+	drawfpscounter();
 	if(flipmode)
 	{
 		SDL_Rect rect;
