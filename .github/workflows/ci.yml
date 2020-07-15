@@ -29,6 +29,12 @@ jobs:
     - name: Build (default version)
       run: ninja -C ${SRC_DIR_PATH}/build
 
+    - name: Upload binary (default version)
+      uses: actions/upload-artifact@v1
+      with:
+        name: VVVVVV-default-macos-latest
+        path: ${{ env.SRC_DIR_PATH }}/build/VVVVVV
+
     - name: CMake configure (official)
       run: |
         cd ${SRC_DIR_PATH}/build
@@ -43,6 +49,12 @@ jobs:
         cmake -DOFFICIAL_BUILD=OFF -DMAKEANDPLAY=ON ..
     - name: Build (M&P)
       run: ninja -C ${SRC_DIR_PATH}/build
+
+    - name: Upload binary (M&P)
+      uses: actions/upload-artifact@v1
+      with:
+        name: VVVVVV-MP-macos-latest
+        path: ${{ env.SRC_DIR_PATH }}/build/VVVVVV
 
     - name: CMake configure (no custom levels)
       run: |
@@ -78,6 +90,12 @@ jobs:
     - name: Build (default version)
       run: make -j $(nproc) -C ${SRC_DIR_PATH}/build
 
+    - name: Upload binary (default version)
+      uses: actions/upload-artifact@v1
+      with:
+        name: VVVVVV-default-ubuntu-latest
+        path: ${{ env.SRC_DIR_PATH }}/build/VVVVVV
+
     - name: CMake configure (official)
       run: |
         cd ${SRC_DIR_PATH}/build
@@ -92,6 +110,12 @@ jobs:
         cmake -DOFFICIAL_BUILD=OFF -DMAKEANDPLAY=ON ..
     - name: Build (M&P)
       run: make -j $(nproc) -C ${SRC_DIR_PATH}/build
+
+    - name: Upload binary (M&P)
+      uses: actions/upload-artifact@v1
+      with:
+        name: VVVVVV-MP-ubuntu-latest
+        path: ${{ env.SRC_DIR_PATH }}/build/VVVVVV
 
     - name: CMake configure (no custom levels)
       run: |
@@ -130,7 +154,13 @@ jobs:
     - name: Build (default version)
       run: |
         cd $env:SRC_DIR_PATH
-        cmake --build .
+        cmake --build . --config Release
+
+    - name: Upload binary (default version)
+      uses: actions/upload-artifact@v1
+      with:
+        name: VVVVVV-default-windows-latest
+        path: ${{ env.SRC_DIR_PATH }}/Release/VVVVVV.exe # ${{ env.SRC_DIR_PATH }}/Debug/VVVVVV.exe if compiling in Debug mode (default)
 
     - name: CMake configure (official)
       run: |
@@ -148,7 +178,13 @@ jobs:
     - name: Build (M&P)
       run: |
         cd $env:SRC_DIR_PATH
-        cmake --build .
+        cmake --build . --config Release
+
+    - name: Upload binary (M&P)
+      uses: actions/upload-artifact@v1
+      with:
+        name: VVVVVV-MP-windows-latest
+        path: ${{ env.SRC_DIR_PATH }}/Release/VVVVVV.exe
 
     - name: CMake configure (no custom levels)
       run: |
