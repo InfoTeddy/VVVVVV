@@ -3320,6 +3320,7 @@ void scriptclass::loadcustom(const std::string& t)
     int customtextmode=0;
     int speakermode=0; //0, terminal, numbers for crew
     int squeakmode=0;//default on
+    bool internalmode = false;
     //Now run the script
     for(size_t i=0; i<lines.size(); i++){
         words[0]="nothing"; //Default!
@@ -3329,7 +3330,20 @@ void scriptclass::loadcustom(const std::string& t)
         {
             words[0][ii] = SDL_tolower(words[0][ii]);
         }
-        if(words[0] == "music"){
+        if (words[0] == "[")
+        {
+            internalmode = true;
+        }
+        else if (words[0] == "]")
+        {
+            internalmode = false;
+        }
+        else if (internalmode)
+        {
+            if(customtextmode==1){ add("endtext"); customtextmode=0;}
+            add(lines[i]);
+        }
+        else if(words[0] == "music"){
             if(customtextmode==1){ add("endtext"); customtextmode=0;}
             if(words[1]=="0"){
                 tstring="stopmusic()";
