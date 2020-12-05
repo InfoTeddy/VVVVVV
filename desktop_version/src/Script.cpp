@@ -3496,6 +3496,8 @@ void scriptclass::hardreset(void)
 	game.activeactivity = -1;
 	game.act_fade = 5;
 
+	obj.deadbodies.clear();
+
 	//dwgraphicsclass
 	graphics.backgrounddrawn = false;
 	graphics.textbox.clear();

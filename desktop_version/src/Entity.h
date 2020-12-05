@@ -20,6 +20,16 @@ enum
     ACTIVITY = 5
 };
 
+struct DeadBody
+{
+    int rx;
+    int ry;
+    int x;
+    int y;
+    int drawframe;
+    Uint32 realcol;
+};
+
 class entityclass
 {
 public:
@@ -193,6 +203,8 @@ public:
     bool customwarpmode, customwarpmodevon, customwarpmodehon;
     std::string customscript;
     bool customcrewmoods[Game::numcrew];
+
+    std::vector<struct DeadBody> deadbodies;
 };
 
 #ifndef OBJ_DEFINITION

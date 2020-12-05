@@ -471,6 +471,8 @@ public:
 
     bool disablepause;
     bool inputdelay;
+
+    void adddeadbody();
 };
 
 #ifndef GAME_DEFINITION

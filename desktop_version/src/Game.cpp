@@ -6880,3 +6880,54 @@ bool Game::nocompetitive(void)
 {
     return slowdown < 30 || map.invincibility;
 }
+
+void Game::adddeadbody()
+{
+    struct DeadBody deadbody;
+    int person;
+    size_t i;
+    bool already_exists;
+
+    deadbody.rx = roomx;
+    deadbody.ry = roomy;
+
+    if (supercrewmate && scmhurt)
+    {
+        person = obj.getscm();
+    }
+    else
+    {
+        person = obj.getplayer();
+    }
+
+    if (!INBOUNDS_VEC(person, obj.entities))
+    {
+        return;
+    }
+
+    deadbody.x = obj.entities[person].xp;
+    deadbody.y = obj.entities[person].yp;
+    deadbody.drawframe = obj.entities[person].drawframe;
+
+    /* Any previous dead bodies? */
+    already_exists = false;
+    for (i = 0; i < obj.deadbodies.size(); ++i)
+    {
+        const struct DeadBody* thisbody = &obj.deadbodies[i];
+
+        if (thisbody->rx == deadbody.rx
+        && thisbody->ry == deadbody.ry
+        && thisbody->x == deadbody.x
+        && thisbody->y == deadbody.y
+        && thisbody->drawframe == deadbody.drawframe)
+        {
+            already_exists = true;
+            break;
+        }
+    }
+
+    if (!already_exists)
+    {
+        obj.deadbodies.push_back(deadbody);
+    }
+}
