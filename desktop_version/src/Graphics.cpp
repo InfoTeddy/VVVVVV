@@ -1814,6 +1814,8 @@ void Graphics::drawentities(void)
             }
         }
 
+        drawdeadbodies(yoff);
+
         for (int i = obj.entities.size() - 1; i >= 0; i--)
         {
             if (obj.entities[i].ishumanoid())
@@ -1824,11 +1826,98 @@ void Graphics::drawentities(void)
     }
     else
     {
+        drawdeadbodies(yoff);
+
         for (int i = obj.entities.size() - 1; i >= 0; i--)
         {
             drawentity(i, yoff);
         }
     }
+}
+
+void Graphics::drawdeadbodies(const int yoff)
+{
+    int i;
+
+    /* Unfortunately, have to copy-paste spritesvec plus screen wrapping code */
+    for (i = obj.deadbodies.size() - 1; i >= 0; --i)
+    {
+        const struct DeadBody* deadbody = &obj.deadbodies[i];
+        const std::vector<SDL_Surface*>& spritesvec = flipmode ? flipsprites : sprites;
+        point tpoint;
+        SDL_Rect drawRect;
+        point wrappedPoint;
+        bool wrapX;
+        bool wrapY;
+        bool isInWrappingAreaOfTower;
+
+        if (deadbody->rx != game.roomx || deadbody->ry != game.roomy
+        || !INBOUNDS_VEC(deadbody->drawframe, spritesvec))
+        {
+            continue;
+        }
+
+        setcolreal(deadbody->realcol);
+
+        tpoint.x = deadbody->x;
+        tpoint.y = deadbody->y - yoff;
+
+        drawRect = sprites_rect;
+        drawRect.x += tpoint.x;
+        drawRect.y += tpoint.y;
+        BlitSurfaceColoured(spritesvec[deadbody->drawframe], NULL, backBuffer, &drawRect, ct);
+
+        wrapX = false;
+        wrapY = false;
+
+        wrappedPoint.x = tpoint.x;
+        if (tpoint.x < 0)
+        {
+            wrapX = true;
+            wrappedPoint.x += 320;
+        }
+        else if (tpoint.x > 300)
+        {
+            wrapX = true;
+            wrappedPoint.x -= 320;
+        }
+
+        wrappedPoint.y = tpoint.y;
+        if (tpoint.y < 0)
+        {
+            wrapY = true;
+            wrappedPoint.y += 230;
+        }
+        else if (tpoint.y > 210)
+        {
+            wrapY = true;
+            wrappedPoint.y -= 230;
+        }
+
+        isInWrappingAreaOfTower = map.towermode && !map.minitowermode && map.ypos >= 500 && map.ypos <= 5000;
+        if (wrapX && (map.warpx || isInWrappingAreaOfTower))
+        {
+            drawRect = sprites_rect;
+            drawRect.x += wrappedPoint.x;
+            drawRect.y += tpoint.y;
+            BlitSurfaceColoured(spritesvec[deadbody->drawframe], NULL, backBuffer, &drawRect, ct);
+        }
+        if (wrapY && map.warpy)
+        {
+            drawRect = sprites_rect;
+            drawRect.x += tpoint.x;
+            drawRect.y += wrappedPoint.y;
+            BlitSurfaceColoured(spritesvec[deadbody->drawframe], NULL, backBuffer, &drawRect, ct);
+        }
+        if (wrapX && wrapY && map.warpx && map.warpy)
+        {
+            drawRect = sprites_rect;
+            drawRect.x += wrappedPoint.x;
+            drawRect.y += wrappedPoint.y;
+            BlitSurfaceColoured(spritesvec[deadbody->drawframe], NULL, backBuffer, &drawRect, ct);
+        }
+    }
+
 }
 
 void Graphics::drawentity(const int i, const int yoff)

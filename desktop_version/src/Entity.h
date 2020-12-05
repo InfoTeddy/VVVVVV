@@ -32,6 +32,16 @@ enum
     TELEPORTER = 102
 };
 
+struct DeadBody
+{
+    int rx;
+    int ry;
+    int x;
+    int y;
+    int drawframe;
+    Uint32 realcol;
+};
+
 class entityclass
 {
 public:
@@ -205,6 +215,8 @@ public:
     bool customcrewmoods[Game::numcrew];
     std::string customactivitycolour;
     std::string customactivitytext;
+
+    std::vector<struct DeadBody> deadbodies;
 };
 
 #ifndef OBJ_DEFINITION

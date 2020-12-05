@@ -171,6 +171,8 @@ public:
 
     void drawentity(const int i, const int yoff);
 
+    void drawdeadbodies(const int yoff);
+
     void drawtrophytext(void);
 
     void bigrprint(int x, int y, const std::string& t, int r, int g, int b, bool cen = false, float sc = 2);

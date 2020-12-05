@@ -114,6 +114,13 @@ void gamerenderfixed(void)
         obj.entities[i].updatecolour();
     }
 
+    // This loop accompanies the above loop
+    for (int i = obj.deadbodies.size() - 1; i >= 0; i--)
+    {
+        graphics.setcol(1); // The color of death
+        obj.deadbodies[i].realcol = graphics.ct.colour;
+    }
+
     if (map.finalmode)
     {
         map.glitchname = map.getglitchname(game.roomx, game.roomy);

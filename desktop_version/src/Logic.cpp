@@ -483,6 +483,7 @@ void gamelogic(void)
 
                 game.gravitycontrol = game.savegc;
                 graphics.textboxremove();
+                game.adddeadbody();
                 map.resetplayer(true);
             }
         }

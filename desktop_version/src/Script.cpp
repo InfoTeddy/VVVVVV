@@ -3189,6 +3189,8 @@ void scriptclass::hardreset(void)
 
     game.disabletemporaryaudiopause = true;
 
+    obj.deadbodies.clear();
+
     //dwgraphicsclass
     graphics.backgrounddrawn = false;
     graphics.textbox.clear();
