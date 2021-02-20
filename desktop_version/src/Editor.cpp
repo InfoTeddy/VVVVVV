@@ -474,7 +474,7 @@ static void editormenurender(int tr, int tg, int tb)
 void editorrender(void)
 {
     extern editorclass ed;
-    const edlevelclass* const room = cl.getroomprop(ed.levx, ed.levy);
+    const RoomProperty* const room = cl.getroomprop(ed.levx, ed.levy);
 
     //Draw grid
 
@@ -1541,7 +1541,7 @@ void editorrender(void)
 void editorrenderfixed(void)
 {
     extern editorclass ed;
-    const edlevelclass* const room = cl.getroomprop(ed.levx, ed.levy);
+    const RoomProperty* const room = cl.getroomprop(ed.levx, ed.levy);
     graphics.updatetitlecolours();
 
     game.customcol=cl.getlevelcol(room->tileset, room->tilecol)+1;
@@ -3707,7 +3707,7 @@ void editorclass::placetilelocal( int x, int y, int t )
 int editorclass::base( int x, int y )
 {
     //Return the base tile for the given tileset and colour
-    const edlevelclass* const room = cl.getroomprop(x, y);
+    const RoomProperty* const room = cl.getroomprop(x, y);
     if(room->tileset==0)  //Space Station
     {
         if(room->tilecol>=22)
@@ -3745,7 +3745,7 @@ int editorclass::base( int x, int y )
 int editorclass::backbase( int x, int y )
 {
     //Return the base tile for the background of the given tileset and colour
-    const edlevelclass* const room = cl.getroomprop(x, y);
+    const RoomProperty* const room = cl.getroomprop(x, y);
     if(room->tileset==0)  //Space Station
     {
         //Pick depending on tilecol
@@ -4203,7 +4203,7 @@ void editorclass::switch_tilecol(const bool reversed /*= false*/)
 
 void editorclass::clamp_tilecol(const int rx, const int ry, const bool wrap /*= false*/)
 {
-    const edlevelclass* const room = cl.getroomprop(rx, ry);
+    const RoomProperty* const room = cl.getroomprop(rx, ry);
     const int tileset = room->tileset;
     int tilecol = room->tilecol;
 
@@ -4247,7 +4247,7 @@ void editorclass::clamp_tilecol(const int rx, const int ry, const bool wrap /*= 
 
 void editorclass::switch_enemy(const bool reversed /*= false*/)
 {
-    const edlevelclass* const room = cl.getroomprop(levx, levy);
+    const RoomProperty* const room = cl.getroomprop(levx, levy);
 
     int enemy = room->enemytype;
 

@@ -34,7 +34,7 @@
 #include <inttypes.h>
 #endif
 
-edlevelclass::edlevelclass(void)
+RoomProperty::RoomProperty(void)
 {
     tileset=0;
     tilecol=0;
@@ -461,7 +461,7 @@ int customlevelclass::getenemycol(int t)
 
 int customlevelclass::getwarpbackground(int rx, int ry)
 {
-    const edlevelclass* const room = getroomprop(rx, ry);
+    const RoomProperty* const room = getroomprop(rx, ry);
     switch(room->tileset)
     {
     case 0: //Space Station
@@ -783,7 +783,7 @@ int customlevelclass::getroompropidx(const int rx, const int ry)
     return rx + ry*maxwidth;
 }
 
-const edlevelclass* customlevelclass::getroomprop(const int rx, const int ry)
+const RoomProperty* customlevelclass::getroomprop(const int rx, const int ry)
 {
     const int idx = getroompropidx(rx, ry);
 
@@ -792,7 +792,7 @@ const edlevelclass* customlevelclass::getroomprop(const int rx, const int ry)
         return &level[idx];
     }
 
-    static edlevelclass blank;
+    static RoomProperty blank;
     blank.tileset = 1;
     blank.directmode = 1;
     blank.roomname.clear();
@@ -1320,24 +1320,24 @@ bool customlevelclass::save(std::string& _path)
     msg = xml::update_element_delete_contents(data, "levelMetaData");
     for(size_t i = 0; i < SDL_arraysize(level); i++)
     {
-        tinyxml2::XMLElement *edlevelclassElement = doc.NewElement( "edLevelClass" );
-        edlevelclassElement->SetAttribute( "tileset", level[i].tileset);
-        edlevelclassElement->SetAttribute(  "tilecol", level[i].tilecol);
-        edlevelclassElement->SetAttribute(  "platx1", level[i].platx1);
-        edlevelclassElement->SetAttribute(  "platy1", level[i].platy1);
-        edlevelclassElement->SetAttribute(  "platx2", level[i].platx2);
-        edlevelclassElement->SetAttribute( "platy2", level[i].platy2);
-        edlevelclassElement->SetAttribute( "platv", level[i].platv);
-        edlevelclassElement->SetAttribute(  "enemyx1", level[i].enemyx1);
-        edlevelclassElement->SetAttribute(  "enemyy1", level[i].enemyy1);
-        edlevelclassElement->SetAttribute(  "enemyx2", level[i].enemyx2);
-        edlevelclassElement->SetAttribute(  "enemyy2", level[i].enemyy2);
-        edlevelclassElement->SetAttribute(  "enemytype", level[i].enemytype);
-        edlevelclassElement->SetAttribute(  "directmode", level[i].directmode);
-        edlevelclassElement->SetAttribute(  "warpdir", level[i].warpdir);
+        tinyxml2::XMLElement *roompropertyElement = doc.NewElement( "edLevelClass" );
+        roompropertyElement->SetAttribute( "tileset", level[i].tileset);
+        roompropertyElement->SetAttribute(  "tilecol", level[i].tilecol);
+        roompropertyElement->SetAttribute(  "platx1", level[i].platx1);
+        roompropertyElement->SetAttribute(  "platy1", level[i].platy1);
+        roompropertyElement->SetAttribute(  "platx2", level[i].platx2);
+        roompropertyElement->SetAttribute( "platy2", level[i].platy2);
+        roompropertyElement->SetAttribute( "platv", level[i].platv);
+        roompropertyElement->SetAttribute(  "enemyx1", level[i].enemyx1);
+        roompropertyElement->SetAttribute(  "enemyy1", level[i].enemyy1);
+        roompropertyElement->SetAttribute(  "enemyx2", level[i].enemyx2);
+        roompropertyElement->SetAttribute(  "enemyy2", level[i].enemyy2);
+        roompropertyElement->SetAttribute(  "enemytype", level[i].enemytype);
+        roompropertyElement->SetAttribute(  "directmode", level[i].directmode);
+        roompropertyElement->SetAttribute(  "warpdir", level[i].warpdir);
 
-        edlevelclassElement->LinkEndChild( doc.NewText( level[i].roomname.c_str() )) ;
-        msg->LinkEndChild( edlevelclassElement );
+        roompropertyElement->LinkEndChild( doc.NewText( level[i].roomname.c_str() )) ;
+        msg->LinkEndChild( roompropertyElement );
     }
 
     std::string scriptString;
@@ -1489,7 +1489,7 @@ void customlevelclass::generatecustomminimap(void)
 // Much kudos to Dav999 for saving me a lot of work, because I stole these colors from const.lua in Ved! -Info Teddy
 Uint32 customlevelclass::getonewaycol(const int rx, const int ry)
 {
-    const edlevelclass* const room = getroomprop(rx, ry);
+    const RoomProperty* const room = getroomprop(rx, ry);
     switch (room->tileset) {
 
     case 0: // Space Station
