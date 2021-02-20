@@ -1070,7 +1070,7 @@ bool customlevelclass::load(std::string& _path)
         {
             for( tinyxml2::XMLElement* edEntityEl = pElem->FirstChildElement(); edEntityEl; edEntityEl=edEntityEl->NextSiblingElement())
             {
-                edentities entity = edentities();
+                CustomEntity entity = CustomEntity();
                 const char* text = edEntityEl->GetText();
 
                 if (text != NULL)
