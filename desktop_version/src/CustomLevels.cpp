@@ -53,9 +53,6 @@ edlevelclass::edlevelclass(void)
 
 editorclass::editorclass(void)
 {
-    //We create a blank map
-    SDL_memset(contents, 0, sizeof(contents));
-
     for (size_t i = 0; i < SDL_arraysize(vmult); i++)
     {
         vmult[i] = i * 40 * maxwidth;
