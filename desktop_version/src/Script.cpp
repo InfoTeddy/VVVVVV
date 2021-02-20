@@ -3,7 +3,7 @@
 
 #include <limits.h>
 
-#include "editor.h"
+#include "CustomLevels.h"
 #include "Entity.h"
 #include "Enums.h"
 #include "Exit.h"
