@@ -2,6 +2,7 @@
 
 #include "Credits.h"
 #include "CustomLevels.h"
+#include "Editor.h"
 #include "Entity.h"
 #include "Enums.h"
 #include "FileSystemUtils.h"
@@ -420,7 +421,7 @@ static void menuactionpress(void)
             //previous page
             music.playef(11);
             if(game.levelpage==0){
-                game.levelpage=(ed.ListOfMetaData.size()-1)/8;
+                game.levelpage=(cl.ListOfMetaData.size()-1)/8;
             }else{
                 game.levelpage--;
             }
@@ -430,7 +431,7 @@ static void menuactionpress(void)
         }else if(game.currentmenuoption==(int)game.menuoptions.size()-3){
             //next page
             music.playef(11);
-            if((size_t) ((game.levelpage*8)+8) >= ed.ListOfMetaData.size()){
+            if((size_t) ((game.levelpage*8)+8) >= cl.ListOfMetaData.size()){
                 game.levelpage=0;
             }else{
                 game.levelpage++;
@@ -443,10 +444,10 @@ static void menuactionpress(void)
             //PLAY CUSTOM LEVEL HOOK
             music.playef(11);
             game.playcustomlevel=(game.levelpage*8)+game.currentmenuoption;
-            game.customleveltitle=ed.ListOfMetaData[game.playcustomlevel].title;
-            game.customlevelfilename=ed.ListOfMetaData[game.playcustomlevel].filename;
+            game.customleveltitle=cl.ListOfMetaData[game.playcustomlevel].title;
+            game.customlevelfilename=cl.ListOfMetaData[game.playcustomlevel].filename;
 
-            std::string name = "saves/" + ed.ListOfMetaData[game.playcustomlevel].filename.substr(7) + ".vvv";
+            std::string name = "saves/" + cl.ListOfMetaData[game.playcustomlevel].filename.substr(7) + ".vvv";
             tinyxml2::XMLDocument doc;
             if (!FILESYSTEM_loadTiXml2Document(name.c_str(), doc)){
                 startmode(22);
@@ -488,7 +489,7 @@ static void menuactionpress(void)
 
             music.playef(11);
             game.levelpage=0;
-            ed.getDirectoryData();
+            cl.getDirectoryData();
             game.loadcustomlevelstats(); //Should only load a file if it's needed
             game.createmenu(Menu::levellist);
             map.nexttowercolour();
@@ -1951,7 +1952,7 @@ void gameinput(void)
     }
 
     //Returning to editor mode must always be possible
-#if !defined(NO_CUSTOM_LEVELS)
+#if !defined(NO_CUSTOM_LEVELS) && !defined(NO_EDITOR)
     if (map.custommode && !map.custommodeforreal)
     {
         if ((game.press_map || key.isDown(27)) && !game.mapheld)
@@ -2467,7 +2468,7 @@ static void mapmenuactionpress(void)
 #if !defined(NO_CUSTOM_LEVELS)
         if(map.custommodeforreal)
         {
-            success = game.customsavequick(ed.ListOfMetaData[game.playcustomlevel].filename);
+            success = game.customsavequick(cl.ListOfMetaData[game.playcustomlevel].filename);
         }
         else
 #endif
