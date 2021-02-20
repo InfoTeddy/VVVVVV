@@ -113,7 +113,10 @@ set(VVV_SRC
 	src/ThirdPartyDeps.c
 )
 if(NOT CUSTOM_LEVEL_SUPPORT STREQUAL "DISABLED")
-	list(APPEND VVV_SRC src/editor.cpp)
+	list(APPEND VVV_SRC src/CustomLevels.cpp)
+	if(NOT CUSTOM_LEVEL_SUPPORT STREQUAL "NO_EDITOR")
+		LIST(APPEND VVV_SRC src/Editor.cpp)
+	endif()
 endif()
 if(STEAM)
 	list(APPEND VVV_SRC src/SteamNetwork.c)
