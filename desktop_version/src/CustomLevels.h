@@ -213,7 +213,6 @@ class editorclass{
   //Colouring stuff
   int getwarpbackground(int rx, int ry);
 
-  std::vector<std::string> getLevelDirFileNames( );
   static const int maxwidth = 20, maxheight = 20; //Special; the physical max the engine allows
   static const int numrooms = maxwidth * maxheight;
   short contents[40 * 30 * numrooms];
