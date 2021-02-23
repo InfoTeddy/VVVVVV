@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "Music.h"
 #include "UtilityClass.h"
+#include "Vlogging.h"
 
 scriptclass::scriptclass(void)
 {
@@ -2599,7 +2600,7 @@ void scriptclass::run(void)
 		if (execution_counter == SHRT_MAX)
 		{
 			// We must be in an infinite loop
-			printf("Warning: execution counter got to %i, stopping script\n", SHRT_MAX);
+			vlog_warn("Warning: execution counter got to %i, stopping script", SHRT_MAX);
 			running = false;
 		}
 		else

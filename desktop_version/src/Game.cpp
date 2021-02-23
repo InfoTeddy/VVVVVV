@@ -2,7 +2,6 @@
 #include "Game.h"
 
 #include <sstream>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tinyxml2.h>
@@ -20,6 +19,7 @@
 #include "Network.h"
 #include "Script.h"
 #include "UtilityClass.h"
+#include "Vlogging.h"
 #include "XMLUtils.h"
 
 static bool GetButtonFromString(const char *pText, SDL_GameControllerButton *button)
@@ -273,7 +273,7 @@ void Game::init(void)
     if (!FILESYSTEM_loadTiXml2Document("saves/qsave.vvv", doc))
     {
         quicksummary = "";
-        printf("Quick Save Not Found\n");
+        vlog_info("Quick Save Not Found");
     }
     else
     {
@@ -284,7 +284,7 @@ void Game::init(void)
         pElem=hDoc.FirstChildElement().ToElement();
         if (!pElem)
         {
-            printf("Quick Save Appears Corrupted: No XML Root\n");
+            vlog_error("Quick Save Appears Corrupted: No XML Root");
         }
 
         // save this for later
@@ -314,7 +314,7 @@ void Game::init(void)
     if (!FILESYSTEM_loadTiXml2Document("saves/tsave.vvv", docTele))
     {
         telesummary = "";
-        printf("Teleporter Save Not Found\n");
+        vlog_info("Teleporter Save Not Found");
     }
     else
     {
@@ -328,7 +328,7 @@ void Game::init(void)
             // should always have a valid root but handle gracefully if it does
             if (!pElem)
             {
-                printf("Teleporter Save Appears Corrupted: No XML Root\n");
+                vlog_error("Teleporter Save Appears Corrupted: No XML Root");
             }
 
             // save this for later
@@ -501,7 +501,7 @@ void Game::loadcustomlevelstats(void)
         // should always have a valid root but handle gracefully if it does
         if (!pElem)
         {
-            printf("Error: Levelstats file corrupted\n");
+            vlog_error("Error: Levelstats file corrupted");
         }
 
         // save this for later
@@ -593,7 +593,7 @@ void Game::savecustomlevelstats(void)
     bool already_exists = FILESYSTEM_loadTiXml2Document("saves/levelstats.vvv", doc);
     if (!already_exists)
     {
-        puts("No levelstats.vvv found. Creating new file");
+        vlog_info("No levelstats.vvv found. Creating new file");
     }
 
     xml::update_declaration(doc);
@@ -638,12 +638,12 @@ void Game::savecustomlevelstats(void)
 
     if(FILESYSTEM_saveTiXml2Document("saves/levelstats.vvv", doc))
     {
-        printf("Level stats saved\n");
+        vlog_info("Level stats saved");
     }
     else
     {
-        printf("Could Not Save level stats!\n");
-        printf("Failed: %s%s\n", saveFilePath, "levelstats.vvv");
+        vlog_error("Could Not Save level stats!");
+        vlog_error("Failed: %s%s", saveFilePath, "levelstats.vvv");
     }
 }
 
@@ -3971,7 +3971,7 @@ void Game::deletestats(void)
 {
     if (!FILESYSTEM_delete("saves/unlock.vvv"))
     {
-        puts("Error deleting saves/unlock.vvv");
+        vlog_error("Error deleting saves/unlock.vvv");
     }
     else
     {
@@ -3999,7 +3999,7 @@ void Game::deletesettings(void)
 {
     if (!FILESYSTEM_delete("saves/settings.vvv"))
     {
-        puts("Error deleting saves/settings.vvv");
+        vlog_error("Error deleting saves/settings.vvv");
     }
 }
 
@@ -4026,7 +4026,7 @@ void Game::loadstats(ScreenSettings* screen_settings)
         // and we don't want to overwrite that!
         savestats(screen_settings);
 
-        printf("No Stats found. Assuming a new player\n");
+        vlog_info("No Stats found. Assuming a new player");
     }
 
     tinyxml2::XMLHandle hDoc(&doc);
@@ -4335,7 +4335,7 @@ bool Game::savestats(const ScreenSettings* screen_settings)
     bool already_exists = FILESYSTEM_loadTiXml2Document("saves/unlock.vvv", doc);
     if (!already_exists)
     {
-        puts("No unlock.vvv found. Creating new file");
+        vlog_info("No unlock.vvv found. Creating new file");
     }
 
     xml::update_declaration(doc);
@@ -4552,7 +4552,7 @@ void Game::loadsettings(ScreenSettings* screen_settings)
     if (!FILESYSTEM_loadTiXml2Document("saves/settings.vvv", doc))
     {
         savesettings(screen_settings);
-        puts("No settings.vvv found");
+        vlog_info("No settings.vvv found");
     }
 
     tinyxml2::XMLHandle hDoc(&doc);
@@ -4595,7 +4595,7 @@ bool Game::savesettings(const ScreenSettings* screen_settings)
     bool already_exists = FILESYSTEM_loadTiXml2Document("saves/settings.vvv", doc);
     if (!already_exists)
     {
-        puts("No settings.vvv found. Creating new file");
+        vlog_info("No settings.vvv found. Creating new file");
     }
 
     xml::update_declaration(doc);
@@ -4846,7 +4846,7 @@ void Game::readmaingamesave(tinyxml2::XMLDocument& doc)
         // should always have a valid root but handle gracefully if it does
         if (!pElem)
         {
-            printf("Save Not Found\n");
+            vlog_error("Save Not Found");
         }
 
         // save this for later
@@ -5021,7 +5021,7 @@ void Game::customloadquick(std::string savfile)
         // should always have a valid root but handle gracefully if it does
         if (!pElem)
         {
-            printf("Save Not Found\n");
+            vlog_error("Save Not Found");
         }
 
         // save this for later
@@ -5196,7 +5196,7 @@ void Game::loadsummary(void)
             // should always have a valid root but handle gracefully if it does
             if (!pElem)
             {
-                printf("Save Not Found\n");
+                vlog_error("Save Not Found");
             }
 
             // save this for later
@@ -5278,7 +5278,7 @@ void Game::loadsummary(void)
             // should always have a valid root but handle gracefully if it does
             if (!pElem)
             {
-                printf("Save Not Found\n");
+                vlog_error("Save Not Found");
             }
 
             // save this for later
@@ -5374,17 +5374,17 @@ bool Game::savetele(void)
     bool already_exists = FILESYSTEM_loadTiXml2Document("saves/tsave.vvv", doc);
     if (!already_exists)
     {
-        puts("No tsave.vvv found. Creating new file");
+        vlog_info("No tsave.vvv found. Creating new file");
     }
     telesummary = writemaingamesave(doc);
 
     if(!FILESYSTEM_saveTiXml2Document("saves/tsave.vvv", doc))
     {
-        printf("Could Not Save game!\n");
-        printf("Failed: %s%s\n", saveFilePath, "tsave.vvv");
+        vlog_error("Could Not Save game!");
+        vlog_error("Failed: %s%s", saveFilePath, "tsave.vvv");
         return false;
     }
-    printf("Game saved\n");
+    vlog_info("Game saved");
     return true;
 }
 
@@ -5401,17 +5401,17 @@ bool Game::savequick(void)
     bool already_exists = FILESYSTEM_loadTiXml2Document("saves/qsave.vvv", doc);
     if (!already_exists)
     {
-        puts("No qsave.vvv found. Creating new file");
+        vlog_info("No qsave.vvv found. Creating new file");
     }
     quicksummary = writemaingamesave(doc);
 
     if(!FILESYSTEM_saveTiXml2Document("saves/qsave.vvv", doc))
     {
-        printf("Could Not Save game!\n");
-        printf("Failed: %s%s\n", saveFilePath, "qsave.vvv");
+        vlog_error("Could Not Save game!");
+        vlog_error("Failed: %s%s", saveFilePath, "qsave.vvv");
         return false;
     }
-    printf("Game saved\n");
+    vlog_info("Game saved");
     return true;
 }
 
@@ -5536,7 +5536,7 @@ bool Game::customsavequick(std::string savfile)
     bool already_exists = FILESYSTEM_loadTiXml2Document(("saves/" + levelfile + ".vvv").c_str(), doc);
     if (!already_exists)
     {
-        printf("No %s.vvv found. Creating new file\n", levelfile.c_str());
+        vlog_info("No %s.vvv found. Creating new file", levelfile.c_str());
     }
 
     xml::update_declaration(doc);
@@ -5655,11 +5655,11 @@ bool Game::customsavequick(std::string savfile)
 
     if(!FILESYSTEM_saveTiXml2Document(("saves/"+levelfile+".vvv").c_str(), doc))
     {
-        printf("Could Not Save game!\n");
-        printf("Failed: %s%s%s\n", saveFilePath, levelfile.c_str(), ".vvv");
+        vlog_error("Could Not Save game!");
+        vlog_error("Failed: %s%s%s", saveFilePath, levelfile.c_str(), ".vvv");
         return false;
     }
-    printf("Game saved\n");
+    vlog_info("Game saved");
     return true;
 }
 
@@ -5800,7 +5800,7 @@ void Game::returnmenu(void)
 {
     if (menustack.empty())
     {
-        puts("Error: returning to previous menu frame on empty stack!");
+        vlog_error("Error: returning to previous menu frame on empty stack!");
         return;
     }
 
@@ -6463,7 +6463,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
 void Game::deletequick(void)
 {
     if( !FILESYSTEM_delete( "saves/qsave.vvv" ) )
-        puts("Error deleting saves/qsave.vvv");
+        vlog_error("Error deleting saves/qsave.vvv");
     else
         quicksummary = "";
 }
@@ -6471,7 +6471,7 @@ void Game::deletequick(void)
 void Game::deletetele(void)
 {
     if( !FILESYSTEM_delete( "saves/tsave.vvv" ) )
-        puts("Error deleting saves/tsave.vvv");
+        vlog_error("Error deleting saves/tsave.vvv");
     else
         telesummary = "";
 }

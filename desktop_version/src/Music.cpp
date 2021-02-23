@@ -2,12 +2,12 @@
 #include "Music.h"
 
 #include <SDL.h>
-#include <stdio.h>
 
 #include "BinaryBlob.h"
 #include "Game.h"
 #include "Map.h"
 #include "UtilityClass.h"
+#include "Vlogging.h"
 
 musicclass::musicclass(void)
 {
@@ -91,7 +91,7 @@ void musicclass::init(void)
 		rw = SDL_RWFromConstMem(blob.getAddress(index), blob.getSize(index)); \
 		if (rw == NULL) \
 		{ \
-			printf("Unable to read music file header: %s\n", SDL_GetError()); \
+			vlog_error("Unable to read music file header: %s", SDL_GetError()); \
 		} \
 		else \
 		{ \
@@ -195,7 +195,7 @@ void musicclass::play(int t)
 
 	if (!INBOUNDS_VEC(t, musicTracks))
 	{
-		puts("play() out-of-bounds!");
+		vlog_error("play() out-of-bounds!");
 		currentsong = -1;
 		return;
 	}
@@ -208,7 +208,7 @@ void musicclass::play(int t)
 		// Level Complete theme, no fade in or repeat
 		if (Mix_PlayMusic(musicTracks[t].m_music, 0) == -1)
 		{
-			printf("Mix_PlayMusic: %s\n", Mix_GetError());
+			vlog_error("Mix_PlayMusic: %s", Mix_GetError());
 		}
 		else
 		{
@@ -236,7 +236,7 @@ void musicclass::play(int t)
 		}
 		else if (Mix_PlayMusic(musicTracks[t].m_music, -1) == -1)
 		{
-			printf("Mix_PlayMusic: %s\n", Mix_GetError());
+			vlog_error("Mix_PlayMusic: %s", Mix_GetError());
 		}
 		else
 		{
@@ -461,7 +461,7 @@ void musicclass::playef(int t)
 	channel = Mix_PlayChannel(-1, soundTracks[t].sound, 0);
 	if(channel == -1)
 	{
-		fprintf(stderr, "Unable to play WAV file: %s\n", Mix_GetError());
+		vlog_error("Unable to play WAV file: %s", Mix_GetError());
 	}
 }
 
