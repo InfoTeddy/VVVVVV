@@ -111,6 +111,7 @@ set(VVV_SRC
 	src/DeferCallbacks.c
 	src/Network.c
 	src/ThirdPartyDeps.c
+	src/Vlogging.c
 )
 if(NOT CUSTOM_LEVEL_SUPPORT STREQUAL "DISABLED")
 	list(APPEND VVV_SRC src/editor.cpp)
