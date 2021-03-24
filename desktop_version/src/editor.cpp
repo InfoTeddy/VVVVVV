@@ -1748,6 +1748,10 @@ void editorclass::switch_enemy(const bool reversed /*= false*/)
 
 bool editorclass::load(std::string& _path)
 {
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLHandle hDoc(&doc);
+    tinyxml2::XMLElement* pElem;
+
     reset();
 
     static const char *levelDir = "levels/";
@@ -1766,37 +1770,32 @@ bool editorclass::load(std::string& _path)
         FILESYSTEM_mountAssets(_path.c_str());
     }
 
-    tinyxml2::XMLDocument doc;
     if (!FILESYSTEM_loadTiXml2Document(_path.c_str(), doc))
     {
-        printf("No level %s to load :(\n", _path.c_str());
-        return false;
+        printf("%s not found\n", _path.c_str());
+        goto fail;
+    }
+
+    if (doc.Error())
+    {
+        printf("Error parsing %s: %s\n", _path.c_str(), doc.ErrorStr());
+        goto fail;
     }
 
     loaded_filepath = _path;
 
-    tinyxml2::XMLHandle hDoc(&doc);
-    tinyxml2::XMLElement* pElem;
-    tinyxml2::XMLHandle hRoot(NULL);
     version = 0;
 
-    {
-        pElem=hDoc.FirstChildElement().ToElement();
-        // should always have a valid root but handle gracefully if it does
-        if (!pElem)
-        {
-            printf("No valid root! Corrupt level file?\n");
-        }
-
-        pElem->QueryIntAttribute("version", &version);
-        // save this for later
-        hRoot=tinyxml2::XMLHandle(pElem);
-    }
-
-    for( pElem = hRoot.FirstChildElement( "Data" ).FirstChild().ToElement(); pElem; pElem=pElem->NextSiblingElement())
+    for (pElem = hDoc
+        .FirstChildElement()
+        .FirstChildElement("Data")
+        .FirstChildElement()
+        .ToElement();
+    pElem != NULL;
+    pElem = pElem->NextSiblingElement())
     {
         const char* pKey = pElem->Value();
-        const char* pText = pElem->GetText() ;
+        const char* pText = pElem->GetText();
         if(pText == NULL)
         {
             pText = "";
@@ -2040,6 +2039,9 @@ next:
     version=2;
 
     return true;
+
+fail:
+    return false;
 }
 
 bool editorclass::save(std::string& _path)
