@@ -939,7 +939,6 @@ void mapclass::gotoroom(int rx, int ry)
 		//Ok, what way are we moving?
 		game.roomx = rx;
 		game.roomy = ry;
-		game.roomchange = true;
 
 		if (game.roomy < 10)
 		{
@@ -966,7 +965,6 @@ void mapclass::gotoroom(int rx, int ry)
 	{
 		game.roomx = rx;
 		game.roomy = ry;
-		game.roomchange = true;
 		if (game.roomx < 100) game.roomx = 100 + ed.mapwidth-1;
 		if (game.roomy < 100) game.roomy = 100 + ed.mapheight-1;
 		if (game.roomx > 100 + ed.mapwidth-1) game.roomx = 100;
@@ -977,7 +975,6 @@ void mapclass::gotoroom(int rx, int ry)
 	{
 		game.roomx = rx;
 		game.roomy = ry;
-		game.roomchange = true;
 		if (game.roomx < 100) game.roomx = 119;
 		if (game.roomy < 100) game.roomy = 119;
 		if (game.roomx > 119) game.roomx = 100;
