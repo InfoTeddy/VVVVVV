@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 
 /* Implements the xoshiro128+ PRNG. */
 
@@ -44,6 +45,8 @@ uint32_t xoshiro_next(void)
 
     s[3] = rotl(s[3], 11);
 
+    printf("Next xoshiro is %u.\n", result);
+
     return result;
 }
 
@@ -54,6 +57,8 @@ void xoshiro_seed(uint32_t s)
     const uint32_t s2 = splitmix32(&s);
     const uint32_t s3 = splitmix32(&s);
     seed(s0, s1, s2, s3);
+
+    printf("Xoshiro seeded with %u.\n", s);
 }
 
 float xoshiro_rand(void)
