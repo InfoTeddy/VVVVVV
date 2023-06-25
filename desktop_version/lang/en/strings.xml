@@ -8,6 +8,7 @@
     <string english="Press N to mute music only" translation="" explanation="pause screen" max="40"/>
     <string english="MAKE AND PLAY EDITION" translation="" explanation="" max="27"/>
     <string english="[MMMMMM Mod Installed]" translation="" explanation="" max="32"/>
+    <string english="Replays are on" translation="" explanation="indicates that replay recordings are enabled and the game will start recording a replay when loading in to gameplay" max="20"/>
     <string english="play" translation="" explanation="main menu option"/>
     <string english="levels" translation="" explanation="main menu option"/>
     <string english="options" translation="" explanation="main menu option"/>
@@ -54,9 +55,11 @@
     <string english="Change the language." translation="" explanation="" max="38*5"/>
     <string english="clear main game data" translation="" explanation="menu option"/>
     <string english="clear custom level data" translation="" explanation="menu option"/>
+    <string english="clear replays" translation="" explanation="menu option"/>
     <string english="Clear Data" translation="" explanation="title" max="20"/>
     <string english="Delete your main game save data and unlocked play modes." translation="" explanation="" max="38*5"/>
     <string english="Delete your custom level save data and completion stars." translation="" explanation="completion stars: when completing a level you get either 1 or 2 stars" max="38*5"/>
+    <string english="Delete your saved replays." translation="" explanation="" max="38*5"/>
     <string english="Are you sure? This will delete your current saves..." translation="" explanation="" max="38*7"/>
     <string english="Are you sure you want to delete all your saved data?" translation="" explanation="" max="38*7"/>
     <string english="Are you sure you want to delete your quicksave?" translation="" explanation="only the quicksave of a custom level" max="38*7"/>
@@ -96,6 +99,11 @@
     <string english="Change whether the game runs at 30 or over 30 FPS." translation="" explanation="" max="38*3"/>
     <string english="Current mode: 30 FPS" translation="" explanation="" max="38*2"/>
     <string english="Current mode: Over 30 FPS" translation="" explanation="" max="38*2"/>
+    <string english="toggle replays" translation="" explanation="menu option"/>
+    <string english="Toggle Replays" translation="" explanation="title" max="20"/>
+    <string english="Enable or disable replay recordings when starting gameplay." translation="" explanation="" max="38*2"/>
+    <string english="Replays are OFF." translation="" explanation="" max="38*2"/>
+    <string english="Replays are ON." translation="" explanation="" max="38*2"/>
     <string english="toggle vsync" translation="" explanation="menu option"/>
     <string english="Toggle VSync" translation="" explanation="title" max="20"/>
     <string english="Turn VSync on or off." translation="" explanation="" max="38*2"/>
