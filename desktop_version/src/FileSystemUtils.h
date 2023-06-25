@@ -67,5 +67,13 @@ bool FILESYSTEM_openDirectory(const char *dname);
 
 bool FILESYSTEM_delete(const char *name);
 void FILESYSTEM_deleteLevelSaves(void);
+void FILESYSTEM_deleteReplays(void);
+
+void FILESYSTEM_setReplaysEnabled(bool set);
+bool FILESYSTEM_replaysEnabled(void);
+bool FILESYSTEM_isReplayOpen(void);
+bool FILESYSTEM_openReplay(const char* level_name, const char* save_path);
+bool FILESYSTEM_writeAppendReplay(const char* line);
+bool FILESYSTEM_closeReplay(void);
 
 #endif /* FILESYSTEMUTILS_H */

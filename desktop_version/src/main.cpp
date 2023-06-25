@@ -853,6 +853,11 @@ static void cleanup(void)
     if (FILESYSTEM_isInit()) /* not necessary but silences logs */
     {
         game.savestatsandsettings();
+
+        if (FILESYSTEM_isReplayOpen())
+        {
+            FILESYSTEM_closeReplay();
+        }
     }
 
     graphics.grphx.destroy();

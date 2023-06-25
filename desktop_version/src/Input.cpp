@@ -267,6 +267,12 @@ static void updatebuttonmappings(int bind)
     }
 }
 
+static std::string replay_line;
+void INPUT_append_replay_line(const char* line)
+{
+    replay_line += std::string(line) + ",";
+}
+
 static void toggleflipmode(void)
 {
     graphics.setflipmode = !graphics.setflipmode;
@@ -280,6 +286,17 @@ static void toggleflipmode(void)
     else
     {
         music.playef(Sound_VIRIDIAN);
+    }
+    if (game.ingame_titlemode && FILESYSTEM_isReplayOpen())
+    {
+        if (graphics.setflipmode)
+        {
+            INPUT_append_replay_line("enable_flipmode");
+        }
+        else
+        {
+            INPUT_append_replay_line("disable_flipmode");
+        }
     }
 }
 
@@ -735,6 +752,10 @@ static void menuactionpress(void)
             game.returnmenu();
             map.nexttowercolour();
             game.savestatsandsettings_menu();
+            if (game.ingame_titlemode && FILESYSTEM_isReplayOpen())
+            {
+                INPUT_append_replay_line("enable_invincibility");
+            }
             break;
         }
         break;
@@ -820,6 +841,18 @@ static void menuactionpress(void)
         game.returnmenu();
         game.savestatsandsettings_menu();
         map.nexttowercolour();
+        if (game.ingame_titlemode && FILESYSTEM_isReplayOpen())
+        {
+            const enum GlitchrunnerMode mode = GlitchrunnerMode_get();
+            char buffer[32];
+            SDL_snprintf(
+                buffer, sizeof(buffer),
+                "glitchrunner %s",
+                mode == GlitchrunnerNone ? "off" :
+                GlitchrunnerMode_enum_to_string(mode)
+            );
+            INPUT_append_replay_line(buffer);
+        }
         break;
     case Menu::advancedoptions:
         switch (game.currentmenuoption)
@@ -875,6 +908,10 @@ static void menuactionpress(void)
                 {
                     map.invincibility = !map.invincibility;
                     game.savestatsandsettings_menu();
+                    if (game.ingame_titlemode && FILESYSTEM_isReplayOpen())
+                    {
+                        INPUT_append_replay_line("disable_invincibility");
+                    }
                 }
                 music.playef(Sound_VIRIDIAN);
             }
@@ -973,32 +1010,45 @@ static void menuactionpress(void)
         }
         else if (game.currentmenuoption == gameplayoptionsoffset + 1)
         {
+            /* toggle replays */
+            music.playef(Sound_VIRIDIAN);
+            FILESYSTEM_setReplaysEnabled(!FILESYSTEM_replaysEnabled());
+            game.savestatsandsettings_menu();
+        }
+        else if (game.currentmenuoption == gameplayoptionsoffset + 2)
+        {
             //Speedrunner options
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::speedrunneroptions);
             map.nexttowercolour();
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 2)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 3)
         {
             //Advanced options
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::advancedoptions);
             map.nexttowercolour();
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 3)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
         {
             //Clear Data
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::cleardatamenu);
             map.nexttowercolour();
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 5)
         {
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::clearcustomdatamenu);
             map.nexttowercolour();
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 5) {
+        else if (game.currentmenuoption == gameplayoptionsoffset + 6)
+        {
+            music.playef(Sound_VIRIDIAN);
+            game.createmenu(Menu::clearreplaydatamenu);
+            map.nexttowercolour();
+        }
+        else if (game.currentmenuoption == gameplayoptionsoffset + 7) {
             //return to previous menu
             music.playef(Sound_VIRIDIAN);
             game.returnmenu();
@@ -1892,6 +1942,22 @@ static void menuactionpress(void)
         game.returnmenu();
         map.nexttowercolour();
         break;
+    case Menu::clearreplaydatamenu:
+        switch (game.currentmenuoption)
+        {
+        default:
+            music.playef(Sound_VIRIDIAN);
+            break;
+        case 1:
+            FILESYSTEM_deleteReplays();
+            music.playef(Sound_DESTROY);
+            game.flashlight = 5;
+            game.screenshake = 15;
+            break;
+        }
+        game.returnmenu();
+        map.nexttowercolour();
+        break;
     case Menu::playmodes:
         if (game.currentmenuoption == 0
             && !game.nocompetitive_unless_translator())   //go to the time trial menu
@@ -2392,11 +2458,71 @@ void titleinput(void)
     }
 }
 
+static void write_replay_line(void)
+{
+    const bool action_no_text_hold =
+        key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_UP) ||
+        key.isDown(KEYBOARD_DOWN);
+    const bool action_with_text_hold =
+        key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_v) ||
+        key.isDown(KEYBOARD_w) || key.isDown(KEYBOARD_s) ||
+        key.isDown(game.controllerButton_flip);
+    const bool left =
+        key.isDown(KEYBOARD_LEFT) || key.isDown(KEYBOARD_a) ||
+        key.controllerWantsLeft(false);
+    const bool right =
+        key.isDown(KEYBOARD_RIGHT) || key.isDown(KEYBOARD_d) ||
+        key.controllerWantsRight(false);
+    const bool restart =
+        key.isDown(SDLK_r) || key.isDown(game.controllerButton_restart);
+    const bool interact =
+        game.separate_interact ?
+            key.isDown(KEYBOARD_e) || key.isDown(game.controllerButton_interact)
+        :
+            key.isDown(KEYBOARD_ENTER) || key.isDown(SDLK_KP_ENTER) ||
+            key.isDown(game.controllerButton_map);
+
+    if (action_no_text_hold)
+    {
+        INPUT_append_replay_line("action_no_text_hold");
+    }
+    if (action_with_text_hold)
+    {
+        INPUT_append_replay_line("action_with_text_hold");
+    }
+    if (left)
+    {
+        INPUT_append_replay_line("left");
+    }
+    if (right)
+    {
+        INPUT_append_replay_line("right");
+    }
+    if (restart)
+    {
+        INPUT_append_replay_line("restart");
+    }
+    if (interact)
+    {
+        INPUT_append_replay_line("interact");
+    }
+
+    replay_line += "|";
+
+    FILESYSTEM_writeAppendReplay(replay_line.c_str());
+    replay_line = "";
+}
+
 void gameinput(void)
 {
     //TODO mouse input
     //game.mx = (mouseX / 2);
     //game.my = (mouseY / 2);
+
+    if (FILESYSTEM_isReplayOpen())
+    {
+        write_replay_line();
+    }
 
     if(!script.running)
     {
@@ -3264,6 +3390,17 @@ void teleporterinput(void)
                 graphics.resumegamemode = true;
                 game.teleport_to_x = tempx;
                 game.teleport_to_y = tempy;
+
+                if (FILESYSTEM_isReplayOpen())
+                {
+                    char buffer[32];
+                    SDL_snprintf(
+                        buffer, sizeof(buffer),
+                        "teleport (%i,%i)",
+                        game.teleport_to_x, game.teleport_to_y
+                    );
+                    INPUT_append_replay_line(buffer);
+                }
 
                 //trace(game.recordstring);
                 //We're teleporting! Yey!

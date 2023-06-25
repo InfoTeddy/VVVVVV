@@ -4651,6 +4651,11 @@ void Game::deserializesettings(tinyxml2::XMLElement* dataNode, struct ScreenSett
             roomname_translator::set_enabled(help.Int(pText));
         }
 
+        if (SDL_strcmp(pKey, "replays_enabled") == 0)
+        {
+            FILESYSTEM_setReplaysEnabled(help.Int(pText));
+        }
+
     }
 
     setdefaultcontrollerbuttons();
@@ -4908,6 +4913,8 @@ void Game::serializesettings(tinyxml2::XMLElement* dataNode, const struct Screen
     xml::update_tag(dataNode, "lang_set", (int) loc::lang_set);
     xml::update_tag(dataNode, "new_level_font", loc::new_level_font.c_str());
     xml::update_tag(dataNode, "roomname_translator", (int) roomname_translator::enabled);
+
+    xml::update_tag(dataNode, "replays_enabled", (int) FILESYSTEM_replaysEnabled());
 }
 
 static bool settings_loaded = false;
@@ -6426,10 +6433,12 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
                 option(loc::gettext("flip mode"));
         }
         option(loc::gettext("toggle fps"));
+        option(loc::gettext("toggle replays"));
         option(loc::gettext("speedrun options"));
         option(loc::gettext("advanced options"));
         option(loc::gettext("clear main game data"));
         option(loc::gettext("clear custom level data"));
+        option(loc::gettext("clear replays"));
         option(loc::gettext("return"));
         menuyoff = -10;
         maxspacing = 15;
@@ -6690,6 +6699,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         break;
     case Menu::cleardatamenu:
     case Menu::clearcustomdatamenu:
+    case Menu::clearreplaydatamenu:
         option(loc::gettext("no! don't delete"));
         option(loc::gettext("yes, delete everything"));
         menuyoff = 64;

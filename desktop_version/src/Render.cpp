@@ -196,6 +196,11 @@ static inline void draw_skip_message()
     );
 }
 
+static void draw_replay_enabled_text(const int flags, const int x, const int y)
+{
+    font::print(flags, x, y, loc::gettext("Replays are on"), tr/2, tg/2, tb/2);
+}
+
 static void menurender(void)
 {
 
@@ -220,11 +225,23 @@ static void menurender(void)
 #endif
         font::print(PR_RIGHT, 310, 230, RELEASE_VERSION, tr/2, tg/2, tb/2);
 
+        int replays_text_y = 230;
         if(music.mmmmmm){
             font::print(0, 10, 230, loc::gettext("[MMMMMM Mod Installed]"), tr/2, tg/2, tb/2);
+            replays_text_y -= 10;
+        }
+        if (FILESYSTEM_replaysEnabled())
+        {
+            draw_replay_enabled_text(0, 10, replays_text_y);
         }
         break;
     }
+    case Menu::play:
+        if (FILESYSTEM_replaysEnabled())
+        {
+            draw_replay_enabled_text(0, 10, 230);
+        }
+        break;
 #if !defined(NO_CUSTOM_LEVELS)
     case Menu::levellist:
     {
@@ -259,8 +276,18 @@ static void menurender(void)
                 }
             }
         }
+        if (FILESYSTEM_replaysEnabled())
+        {
+            draw_replay_enabled_text(PR_RIGHT, 310, 230);
+        }
         break;
     }
+    case Menu::quickloadlevel:
+        if (FILESYSTEM_replaysEnabled())
+        {
+            draw_replay_enabled_text(PR_RIGHT, 310, 230);
+        }
+        break;
 #endif
     case Menu::errornostart:
         font::print_wrap(PR_CEN, -1, 65, loc::gettext("ERROR: This level has no start point!"), tr, tg, tb);
@@ -305,26 +332,45 @@ static void menurender(void)
         }
         else if (game.currentmenuoption == gameplayoptionsoffset + 1)
         {
+            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Toggle Replays"), tr, tg, tb);
+            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Enable or disable replay recordings when starting gameplay."), tr, tg, tb);
+
+            if (!FILESYSTEM_replaysEnabled())
+            {
+                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Replays are OFF."), tr/2, tg/2, tb/2);
+            }
+            else
+            {
+                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Replays are ON."), tr, tg, tb);
+            }
+        }
+        else if (game.currentmenuoption == gameplayoptionsoffset + 2)
+        {
             //Speedrunner options
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Speedrunner Options"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Access some advanced settings that might be of interest to speedrunners."), tr, tg, tb);
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 2)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 3)
         {
             //Advanced options
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Advanced Options"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("All other gameplay settings."), tr, tg, tb);
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 3)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
         {
             //Clear Data
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Clear Data"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Delete your main game save data and unlocked play modes."), tr, tg, tb);
         }
-        else if (game.currentmenuoption == gameplayoptionsoffset + 4)
+        else if (game.currentmenuoption == gameplayoptionsoffset + 5)
         {
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Clear Data"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Delete your custom level save data and completion stars."), tr, tg, tb);
+        }
+        else if (game.currentmenuoption == gameplayoptionsoffset + 6)
+        {
+            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Clear Data"), tr, tg, tb);
+            font::print_wrap(PR_CEN, -1, 65, loc::gettext("Delete your saved replays."), tr, tg, tb);
         }
 
         break;
@@ -605,6 +651,7 @@ static void menurender(void)
         break;
     case Menu::cleardatamenu:
     case Menu::clearcustomdatamenu:
+    case Menu::clearreplaydatamenu:
         font::print_wrap(PR_CEN, -1, 100, loc::gettext("Are you sure you want to delete all your saved data?"), tr, tg, tb);
         break;
     case Menu::deletequicklevel:
@@ -1259,6 +1306,10 @@ static void menurender(void)
             graphics.draw_sprite(270, 126-20, 22, graphics.col_trinket);
             break;
         }
+        }
+        if (FILESYSTEM_replaysEnabled())
+        {
+            draw_replay_enabled_text(0, 10, 230);
         }
         break;
     case Menu::gameover:

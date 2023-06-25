@@ -74,6 +74,7 @@ namespace Menu
         translator_error_setlangwritedir,
         cleardatamenu,
         clearcustomdatamenu,
+        clearreplaydatamenu,
         setinvincibility,
         setslowdown,
         unlockmenu,

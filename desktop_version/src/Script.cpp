@@ -11,6 +11,7 @@
 #include "Entity.h"
 #include "Enums.h"
 #include "Exit.h"
+#include "FileSystemUtils.h"
 #include "Font.h"
 #include "GlitchrunnerMode.h"
 #include "Graphics.h"
@@ -2634,15 +2635,18 @@ void scriptclass::startgamemode(const enum StartMode mode)
         case Start_MAINGAME_TELESAVE:
             game.loadtele();
             graphics.fademode = FADE_START_FADEIN;
+            FILESYSTEM_openReplay(NULL, "saves/tsave.vvv");
             break;
         case Start_MAINGAME_QUICKSAVE:
             game.loadquick();
             graphics.fademode = FADE_START_FADEIN;
+            FILESYSTEM_openReplay(NULL, "saves/qsave.vvv");
             break;
         default:
             graphics.showcutscenebars = true;
             graphics.setbars(320);
             load("intro");
+            FILESYSTEM_openReplay(NULL, NULL);
         }
         break;
 
@@ -2845,6 +2849,9 @@ void scriptclass::startgamemode(const enum StartMode mode)
         music.fadeout();
         game.customstart();
 
+        /* Strip the leading 'levels/' for openReplay() */
+        std::string name_no_prefix = cl.ListOfMetaData[game.playcustomlevel].filename.substr(7);
+
         switch (mode)
         {
         case Start_CUSTOM:
@@ -2856,9 +2863,14 @@ void scriptclass::startgamemode(const enum StartMode mode)
             {
                 music.currentsong = -1;
             }
+            FILESYSTEM_openReplay(name_no_prefix.c_str(), NULL);
             break;
         case Start_CUSTOM_QUICKSAVE:
             game.customloadquick(cl.ListOfMetaData[game.playcustomlevel].filename);
+            FILESYSTEM_openReplay(
+                name_no_prefix.c_str(),
+                ("saves/" + name_no_prefix + ".vvv").c_str()
+            );
             break;
         default:
             VVV_unreachable();
@@ -3273,6 +3285,15 @@ void scriptclass::hardreset(void)
     obj.customactivitycolour = "";
     obj.customactivitytext = "";
     obj.customactivitypositiony = -1;
+
+    if (FILESYSTEM_isReplayOpen())
+    {
+        const bool success = FILESYSTEM_closeReplay();
+        if (!success)
+        {
+            vlog_error("Unable to close replay");
+        }
+    }
 }
 
 bool scriptclass::loadcustom(const std::string& t)

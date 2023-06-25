@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <time.h>
 #include <tinyxml2.h>
 
 #include "Alloc.h"
@@ -42,17 +43,21 @@ static int mkdir(char* path, int mode)
 #endif
 
 static bool isInit = false;
+static bool recordReplays = false;
 
 static const char* pathSep = NULL;
 static char* basePath = NULL;
 static char writeDir[MAX_PATH] = {'\0'};
 static char saveDir[MAX_PATH] = {'\0'};
 static char levelDir[MAX_PATH] = {'\0'};
+static char replayDir[MAX_PATH] = {'\0'};
 static char mainLangDir[MAX_PATH] = {'\0'};
 static bool isMainLangDirFromRepo = false;
 
 static char assetDir[MAX_PATH] = {'\0'};
 static char virtualMountPath[MAX_PATH] = {'\0'};
+
+static PHYSFS_File* replayFile = NULL;
 
 static int PLATFORM_getOSDirectory(char* output, const size_t output_size);
 
@@ -246,6 +251,15 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     );
     mkdir(levelDir, 0777);
     vlog_info("Level directory: %s", levelDir);
+
+    /* Store full replay directory */
+    SDL_snprintf(replayDir, sizeof(replayDir), "%s%s%s",
+        writeDir,
+        "replays",
+        pathSep
+    );
+    mkdir(replayDir, 0777);
+    vlog_info("Replay directory: %s", replayDir);
 
     basePath = SDL_GetBasePath();
 
@@ -1294,4 +1308,230 @@ void FILESYSTEM_deleteLevelSaves(void)
             PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
         );
     }
+}
+
+static void replayCallback(const char* filename)
+{
+    if (endsWith(filename, ".vrp") || endsWith(filename, ".vvv"))
+    {
+        if (!FILESYSTEM_delete(filename))
+        {
+            vlog_error("Error deleting %s", filename);
+        }
+    }
+}
+
+void FILESYSTEM_deleteReplays(void)
+{
+    int success;
+    struct CallbackWrapper wrapper = {replayCallback};
+
+    success = PHYSFS_enumerate(
+        "replays",
+        enumerateCallback,
+        (void*) &wrapper
+    );
+
+    if (success == 0)
+    {
+        vlog_error(
+            "Could not enumerate replays/: %s",
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+    }
+}
+
+void FILESYSTEM_setReplaysEnabled(const bool set)
+{
+    recordReplays = set;
+}
+
+bool FILESYSTEM_replaysEnabled(void)
+{
+    return recordReplays;
+}
+
+bool FILESYSTEM_isReplayOpen(void)
+{
+    return replayFile != NULL;
+}
+
+/* PhysFS does not have a copy function */
+static bool copy_file(const char* src, const char* dest)
+{
+    unsigned char* mem;
+    size_t len;
+    FILESYSTEM_loadFileToMemory(src, &mem, &len);
+    if (mem == NULL)
+    {
+        vlog_error(
+            "Unable to copy %s to %s: could not read %s",
+            src, dest, src
+        );
+        return false;
+    }
+
+    PHYSFS_File* dest_file = PHYSFS_openWrite(dest);
+    if (dest_file == NULL)
+    {
+        vlog_error(
+            "Unable to open %s: %s",
+            dest,
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+        return false;
+    }
+
+    const PHYSFS_sint64 bytes_written = PHYSFS_writeBytes(dest_file, mem, len);
+    if (bytes_written == -1 || (unsigned) bytes_written < len)
+    {
+        vlog_error(
+            "Unable to write bytes to %s: %s",
+            dest,
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+        return false;
+    }
+
+    const int success = PHYSFS_close(dest_file);
+    if (success == 0)
+    {
+        vlog_error(
+            "Unable to close %s: %s",
+            dest,
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+        return false;
+    }
+
+    return true;
+}
+
+bool FILESYSTEM_openReplay(const char* level_name, const char* save_path)
+{
+    if (!recordReplays)
+    {
+        // gracefully no-op.
+        return true;
+    }
+
+    if (replayFile != NULL)
+    {
+        SDL_assert(0 && "opening replay when one is already open");
+        return false;
+    }
+
+    const bool custom_level = level_name != NULL;
+
+    const time_t now = time(NULL);
+
+    char timestamp[32];
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d_%H-%M-%S", localtime(&now));
+
+    char base_name[MAX_PATH];
+    if (custom_level)
+    {
+        SDL_snprintf(
+            base_name, sizeof(base_name),
+            "%s_custom_%s",
+            timestamp, level_name
+        );
+    }
+    else
+    {
+        SDL_snprintf(
+            base_name, sizeof(base_name),
+            "%s_main_game",
+            timestamp
+        );
+    }
+
+    char path[MAX_PATH];
+
+    // copy save file if applicable
+    if (save_path != NULL)
+    {
+        SDL_snprintf(path, sizeof(path), "replays/%s.vvv", base_name);
+        const bool success = copy_file(save_path, path);
+        if (!success)
+        {
+            return false;
+        }
+        vlog_info("Copied save file for replay from %s to %s", save_path, path);
+    }
+
+    SDL_snprintf(path, sizeof(path), "replays/%s.vrp", base_name);
+    replayFile = PHYSFS_openAppend(path);
+    if (replayFile == NULL)
+    {
+        vlog_error(
+            "Unable to open %s for appending: %s",
+            path,
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+        return false;
+    }
+    vlog_info("Opened replay file %s", base_name);
+
+    return true;
+}
+
+bool FILESYSTEM_writeAppendReplay(const char* line)
+{
+    if (replayFile == NULL)
+    {
+        SDL_assert(0 && "writing to replay when it's not open");
+        return false;
+    }
+
+    const size_t length = SDL_strlen(line);
+
+    PHYSFS_sint64 bytes_written = PHYSFS_writeBytes(
+        replayFile, line, length
+    );
+    if (bytes_written == -1 || (unsigned) bytes_written < length)
+    {
+        vlog_error(
+            "Unable to write to replay file: %s",
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+        return false;
+    }
+
+    bytes_written = PHYSFS_writeBytes(
+        replayFile, "\n", 1
+    );
+    if (bytes_written == -1 || (unsigned) bytes_written < 1)
+    {
+        vlog_error(
+            "Unable to write to replay file: %s",
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+        return false;
+    }
+
+    return true;
+}
+
+bool FILESYSTEM_closeReplay(void)
+{
+    if (replayFile == NULL)
+    {
+        SDL_assert(0 && "closing replay when it's not open");
+        return false;
+    }
+
+    const int success = PHYSFS_close(replayFile);
+    if (success == 0)
+    {
+        vlog_warn(
+            "Could not close replay file: %s",
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+        );
+    }
+
+    vlog_info("Closing replay file");
+
+    replayFile = NULL;
+    return true;
 }

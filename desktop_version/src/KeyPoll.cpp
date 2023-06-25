@@ -6,6 +6,7 @@
 #include "Alloc.h"
 #include "ButtonGlyphs.h"
 #include "Exit.h"
+#include "FileSystemUtils.h"
 #include "Game.h"
 #include "GlitchrunnerMode.h"
 #include "Graphics.h"
@@ -70,6 +71,9 @@ bool KeyPoll::textentry(void)
     return SDL_IsTextInputActive() == SDL_TRUE;
 }
 
+/* from Input.cpp */
+void INPUT_append_replay_line(const char* line);
+
 void KeyPoll::toggleFullscreen(void)
 {
     gameScreen.toggleFullScreen();
@@ -81,6 +85,10 @@ void KeyPoll::toggleFullscreen(void)
         game.press_right = false;
         game.press_action = true;
         game.press_map = false;
+    }
+    if (FILESYSTEM_isReplayOpen())
+    {
+        INPUT_append_replay_line("toggle_fullscreen");
     }
 }
 
