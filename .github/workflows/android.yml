@@ -56,6 +56,22 @@ jobs:
         submodules: true
         path: 'VVVVVV'
 
+    - name: Cache data.zip
+      id: cache-android-datazip
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-datazip
+      with:
+        path: ${{ env.SRC_DIR_PATH }}/app/src/main/assets/data.zip
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-data.zip
+
+    - if: ${{ steps.cache-android-datazip.outputs.cache-hit != 'true' }}
+      name: Download data.zip if not cached
+      run: |
+        curl -O "https://thelettervsixtim.es/makeandplay/data.zip"
+        mkdir -p ${SRC_DIR_PATH}/app/src/main/assets/
+        mv data.zip ${SRC_DIR_PATH}/app/src/main/assets/
+
     - uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
@@ -79,3 +95,9 @@ jobs:
       run: |
         cd ${SRC_DIR_PATH}
         ./gradlew build
+
+    - name: Upload APKs
+      uses: actions/upload-artifact@v4
+      with:
+        name: VVVVVV-default-android-${{ github.sha }}
+        path: ${{ env.SRC_DIR_PATH }}/app/build/outputs/apk/debug/*.apk
